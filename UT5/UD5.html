@@ -295,6 +295,10 @@ code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-fami
           <a href="#consultas-multitabla-mediante-inner-join" class="md-toc-link">
             <p>Consultas multitabla mediante INNER JOIN</p>
 
+          </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#la-cláusula-left-join-y-right-join" class="md-toc-link">
+            <p>La cláusula LEFT JOIN y RIGHT JOIN</p>
+
           </a></div><details style="padding:0;;padding-left:24px;" open="">
         <summary class="md-toc-link-wrapper">
           <a href="#consultas-multitabla-mediante-operaciones-conjuntistas" class="md-toc-link"><p>Consultas multitabla mediante operaciones conjuntistas</p>
@@ -928,7 +932,8 @@ Mostrar los valores de la tabla <strong>detallepedidos</strong> pero añadiendo 
 <pre data-role="codeBlock" data-info="sql" class="language-sql sql"><code><span class="token keyword keyword-SELECT">SELECT</span> pedidos<span class="token punctuation">.</span>FechaPedido<span class="token punctuation">,</span> pedidos<span class="token punctuation">.</span>Estado<span class="token punctuation">,</span> detallepedidos<span class="token punctuation">.</span><span class="token operator">*</span>
 <span class="token keyword keyword-FROM">FROM</span> <span class="token punctuation">(</span>detallepedidos <span class="token keyword keyword-INNER">INNER</span> <span class="token keyword keyword-JOIN">JOIN</span> pedidos <span class="token keyword keyword-ON">ON</span> detallepedidos<span class="token punctuation">.</span>CodigoPedido <span class="token operator">=</span> pedidos<span class="token punctuation">.</span>CodigoPedido<span class="token punctuation">)</span><span class="token punctuation">;</span>
 </code></pre></div>
-<p>En las consultas multitabla mediante intersección, <strong>es posible que haya registros que no se muestren por no haber cruce entre entre ellos</strong>. Por ejemplo, si queremos saber el número de pedidos realizados por cada cliente, podríamos pensar en realizar la siguiente consulta:</p>
+<h3 id="la-cláusula-left-join-y-right-join">La cláusula LEFT JOIN y RIGHT JOIN </h3>
+<p>En las consultas multitabla con <strong>INNER JOIN</strong>, <strong>es posible que haya registros que no se muestren por no haber cruce entre entre ellos</strong>. Por ejemplo, si queremos saber el número de pedidos realizados por cada cliente, podríamos pensar en realizar la siguiente consulta:</p>
 <div class="admonition example">
 <p class="admonition-title">Ejemplo 3</p>
 <p><strong>SELECT multitabla con <code>INNER JOIN</code></strong><br>
@@ -953,14 +958,20 @@ Mostrar el número de pedidos realizados por cada cliente, incluyendo aquellos q
 <p class="admonition-title">Ejemplo 5</p>
 <p><strong>SELECT multitabla con <code>LEFT JOIN</code></strong><br>
 Mostrar el <strong><code>CodigoProducto</code></strong> y nombre de la tabla <strong>productos</strong> junto con la suma de la cantidad (<strong><code>SumCantidad</code></strong>) pedida en todos los pedidos existentes.</p>
-<blockquote>
-<p>📌 Tened en cuenta que de los productos que no haya habido ningún pedido debe aparecer 0.</p>
-</blockquote>
 <pre data-role="codeBlock" data-info="sql" class="language-sql sql"><code><span class="token keyword keyword-SELECT">SELECT</span> productos<span class="token punctuation">.</span>CodigoProducto<span class="token punctuation">,</span> productos<span class="token punctuation">.</span>Nombre<span class="token punctuation">,</span> <span class="token function">SUM</span><span class="token punctuation">(</span>detallepedidos<span class="token punctuation">.</span>Cantidad<span class="token punctuation">)</span> <span class="token keyword keyword-AS">AS</span> SumCantidad
 <span class="token keyword keyword-FROM">FROM</span> productos <span class="token keyword keyword-LEFT">LEFT</span> <span class="token keyword keyword-JOIN">JOIN</span> detallepedidos <span class="token keyword keyword-ON">ON</span> productos<span class="token punctuation">.</span>CodigoProducto <span class="token operator">=</span> detallepedidos<span class="token punctuation">.</span>CodigoProducto
 <span class="token keyword keyword-GROUP">GROUP</span> <span class="token keyword keyword-BY">BY</span> productos<span class="token punctuation">.</span>CodigoProducto<span class="token punctuation">;</span>
 </code></pre></div>
-<p>La cláusula <strong><code>RIGHT JOIN</code></strong> permitiría que se mostrarán los de la segunda tabla en la relación, en vez de <strong><code>LEFT</code></strong> que muestra la primera.</p>
+<p>La cláusula <strong><code>RIGHT JOIN</code></strong> permitiría que se mostrarán los de la segunda tabla en la relación, en vez de <strong><code>LEFT</code></strong> que muestra la primera. También se podrían invertir las tablas en la consulta con <strong><code>LEFT JOIN</code></strong> para obtener el mismo resultado. El siguiente ejemplo muestra el uso de <strong><code>RIGHT JOIN</code></strong> y su equivalencia con <strong><code>LEFT JOIN</code></strong>.</p>
+<div class="admonition example">
+<p class="admonition-title">Ejemplo 6</p>
+<p><strong>SELECT multitabla con <code>RIGHT JOIN</code></strong><br>
+Mostrar el número de pedidos realizados por cada cliente, incluyendo aquellos que no han realizado ninguno.</p>
+<pre data-role="codeBlock" data-info="sql" class="language-sql sql"><code><span class="token keyword keyword-SELECT">SELECT</span> clientes<span class="token punctuation">.</span>CodigoCliente<span class="token punctuation">,</span> clientes<span class="token punctuation">.</span>NombreCliente<span class="token punctuation">,</span> <span class="token function">COUNT</span><span class="token punctuation">(</span>pedidos<span class="token punctuation">.</span>CodigoPedido<span class="token punctuation">)</span>
+<span class="token keyword keyword-FROM">FROM</span> pedidos <span class="token keyword keyword-RIGHT">RIGHT</span> <span class="token keyword keyword-JOIN">JOIN</span> clientes <span class="token keyword keyword-ON">ON</span> clientes<span class="token punctuation">.</span>CodigoCliente <span class="token operator">=</span> pedidos<span class="token punctuation">.</span>CodigoCliente
+<span class="token keyword keyword-GROUP">GROUP</span> <span class="token keyword keyword-BY">BY</span> clientes<span class="token punctuation">.</span>CodigoCliente<span class="token punctuation">;</span>
+</code></pre><p>Hemos utilizado <strong><code>RIGHT JOIN</code></strong> para que se muestren todos los registros de la tabla clientes, que es la segunda tabla en la relación. El resultado es el mismo que el obtenido con <strong><code>LEFT JOIN</code></strong> en el ejemplo 4.</p>
+</div>
 <h3 id="consultas-multitabla-mediante-operaciones-conjuntistas">Consultas multitabla mediante operaciones conjuntistas </h3>
 <p>Para realizar consultas multitabla también podemos utilizar operaciones conjuntistas como <strong><code>UNION</code></strong>, <strong><code>INTERSECT</code></strong> y <strong><code>EXCEPT</code></strong>. Hay que tener en cuenta que estas operaciones conjuntistas no son tan flexibles como las consultas multitabla mediante cruce o joins, ya que requieren que las consultas tengan el mismo número de campos y tipos de datos compatibles.</p>
 <h4 id="la-cláusula-union">La cláusula <code>UNION</code> </h4>
