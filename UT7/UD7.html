@@ -286,7 +286,24 @@ code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-fami
           <a href="#instalación" class="md-toc-link">
             <p>Instalación</p>
 
+          </a></div><details style="padding:0;;padding-left:24px;" open="">
+        <summary class="md-toc-link-wrapper">
+          <a href="#entorno-de-trabajo-en-mongodb" class="md-toc-link"><p>Entorno de trabajo en MongoDB</p>
+</a>
+          </summary>
+        <div>
+          <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#mongodb-compass" class="md-toc-link">
+            <p>MongoDB Compass</p>
+
           </a></div><div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#mongodb-shell-mongosh" class="md-toc-link">
+            <p>MongoDB Shell (mongosh)</p>
+
+          </a></div>
+        </div>
+      </details>
+    <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
           <a href="#bases-de-datos-y-colecciones-en-mongodb" class="md-toc-link">
             <p>Bases de datos y colecciones en MongoDB</p>
 
@@ -353,11 +370,7 @@ code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-fami
           </a></div>
         </div>
       </details>
-    <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
-          <a href="#la-consola-de-mongodb" class="md-toc-link">
-            <p>La consola de MongoDB</p>
-
-          </a></div>
+    
         </div>
       </details>
     
@@ -596,6 +609,64 @@ En <strong>Windows</strong>, se ubica en: <strong>C:\Program Files\MongoDB\Serve
 <ul>
 <li><a href="https://docs.mongodb.com/">Documentación oficial MongoDB</a></li>
 </ul>
+</div>
+<h3 id="entorno-de-trabajo-en-mongodb">Entorno de trabajo en MongoDB </h3>
+<p>Una vez instalado MongoDB, podemos interactuar con el servidor de varias formas. La más directa es mediante la consola de comandos <strong>mongosh</strong>, que se instala automáticamente junto con el servidor MongoDB. También existen herramientas gráficas como <strong>MongoDB Compass</strong> o <strong>MongoAdmin</strong> que facilitan la gestión visual de las bases de datos. En nuestro caso hemos instalado <strong>MongoDB Compass</strong> junto con el servidor, por lo que podemos utilizarlo para conectarnos al servidor y gestionar las bases de datos de forma visual.</p>
+<p>En las <strong>instalaciones como localhost se deshabilita la autenticación</strong> por defecto, por lo que no es necesario crear usuarios para conectarse al servidor. En instalaciones en producción, es recomendable habilitar la autenticación y crear usuarios con los permisos adecuados para cada tarea.</p>
+<h4 id="mongodb-compass">MongoDB Compass </h4>
+<p>MongoDB Compass es una herramienta gráfica de escritorio que permite a los usuarios interactuar con sus bases de datos MongoDB de manera visual e intuitiva. Proporciona una interfaz amigable para explorar, consultar y administrar las colecciones y documentos almacenados en MongoDB, sin necesidad de escribir comandos en la línea de comandos.</p>
+<p>Con MongoDB Compass, los usuarios pueden conectarse a sus despliegues de MongoDB, ya sea localmente o en la nube, y realizar operaciones como crear bases de datos, colecciones y documentos, ejecutar consultas con filtros avanzados, visualizar índices y analizar el rendimiento de las consultas. Además, ofrece funcionalidades para importar y exportar datos, así como para gestionar usuarios y permisos.</p>
+<p>Utilizar por primera vez MongoDB Compass es sencillo. Al abrir la aplicación, se presenta una pantalla de conexión donde se pueden ingresar los detalles del servidor MongoDB al que se desea conectar, como la dirección IP, el puerto, las credenciales de autenticación y otras opciones de configuración. Una vez establecida la conexión, se accede a una interfaz gráfica que muestra las bases de datos disponibles, permitiendo navegar por ellas y realizar diversas operaciones de gestión y consulta de manera visual.</p>
+<p>El siguiente video muestra los pasos iniciales para conectarse a un servidor MongoDB local utilizando MongoDB Compass.</p>
+<div class="row" style="max-width: 300px; margin: auto;">
+<video width="100%" style="max-width: 560px; height: auto; aspect-ratio: 16/9;" controls="">
+    <source src="./.img/Mongo Compass.webm" type="video/webm">
+    Tu navegador no soporta la reproducción de video.
+</video>
+</div>
+<p>Como se muestra en el video, podemos abrir un terminal de Mongo Shell desde MongoDB Compass.</p>
+<h4 id="mongodb-shell-mongosh">MongoDB Shell (mongosh) </h4>
+<p>MongoDB Shell, conocido como <strong>mongosh</strong>, es un entorno interactivo REPL basado en JavaScript y Node.js que permite conectarse y trabajar directamente con despliegues de MongoDB, ya sea a nivel local, remoto o en la nube mediante Atlas. Permite ejecutar consultas, administrar bases de datos, manipular datos mediante operaciones CRUD y automatizar tareas mediante scripts. Su diseño moderno mejora significativamente la experiencia del desarrollador gracias a funcionalidades como autocompletado, resaltado de sintaxis y mensajes de error más detallados.</p>
+<p>No es necesario instalar mongosh en el mismo equipo donde se encuentra el servidor MongoDB, ya que puede instalarse de forma independiente en cualquier máquina que necesite conectarse al servidor. Esto facilita la administración remota y el desarrollo distribuido. Si instalamos mongosh en un equipo diferente, debemos asegurarnos de que el servidor MongoDB esté configurado para aceptar conexiones remotas, ajustando la directiva bindIp con el valor <code>0.0.0.0</code> en el archivo de configuración <code>mongod.cfg</code>. Si tenemos algún cortafuegos o firewall, también debemos asegurarnos de que el puerto 27017 esté abierto para permitir la comunicación entre mongosh y el servidor MongoDB.</p>
+<p>Para descargar e instalar mongosh de forma independiente, podemos visitar la página oficial de descargas en <a href="https://www.mongodb.com/try/download/shell">https://www.mongodb.com/try/download/shell</a> y seguir las instrucciones específicas para nuestro sistema operativo.</p>
+<div class="admonition example">
+<p class="admonition-title">Instalar mongosh en Linux</p>
+<p>En este ejemplo, descargaremos e instalaremos mongosh en un equipo con Debian 11 Linux y nos conectaremos a un servidor MongoDB de nuestra red local (192.168.2.5) que corre en una máquina con Windows 10. Vamos a suponer que el sevidor MongoDB está configurado para aceptar conexiones de otros equipos de la red local y que previamente se ha creado una regla en el cortafuegos de Windows para permitir las conexiones entrantes al puerto 27017.<br>
+Con estos supuestos, los pasos para descargar, instalar y conectarnos al servidor remoto son los siguientes:</p>
+<ul>
+<li>
+<p>Accedemos a la página web de descargas de mongosh (<a href="https://www.mongodb.com/try/download/shell">https://www.mongodb.com/try/download/shell</a>) y vemos cual es la url para descargar el paquete DEB para Linux x64.</p>
+</li>
+<li>
+<p>Descargamos el paquete y lo instalamos con el gestor de paquetes proporcionado por la distribución.<br>
+Para el caso de equipos sin entorno gráfico, podemos realizar la descarga e instalación desde la línea de comandos:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code><span class="token function">wget</span> https://downloads.mongodb.com/compass/mongodb-mongosh_2.6.0_amd64.deb
+dpkg <span class="token parameter variable">-i</span> mongodb-mongosh_2.6.0_amd64.deb
+</code></pre></li>
+<li>
+<p>Una vez instalado, podemos conectarnos al servidor remoto desde una terminal el siguiente comando:</p>
+<pre data-role="codeBlock" data-info="bash" class="language-bash bash"><code>mongosh mongodb://192.168.2.5:27017
+</code></pre><p>Si nos aparece algo similar a la siguiente imagen, significa que la conexión se ha realizado correctamente.</p>
+ <div class="row">
+ <div class="col-sm-12 my-auto">
+<p><img src="./.img/MongoshConexion.png" alt="Img5"></p>
+ </div>
+ </div>
+</li>
+</ul>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Instalar mongosh en Windows</p>
+<p>En este supuesto, instalaremos mongosh en un equipo con Windows 10 y nos conectaremos al servidor MongoDB del ejemplo anterior (192.168.2.5).<br>
+El proceso es muy sencillo, solo tenemos que descargarnos el instalador MSI desde la página oficial de descargas (<a href="https://www.mongodb.com/try/download/shell">https://www.mongodb.com/try/download/shell</a>) e instalarlo.<br>
+A continuación, abrimos una terminal CMD y nos conectamos al servidor remoto con el siguiente comando:</p>
+<pre data-role="codeBlock" data-info="cmd" class="language-cmd cmd"><code>mongosh mongodb://192.168.2.5:27017
+</code></pre><p>Si todo ha ido bien, nos aparecerá una pantalla similar a la del ejemplo anterior, indicando que la conexión se ha realizado correctamente.</p>
+ <div class="row">
+ <div class="col-sm-12 my-auto">
+<p><img src="./.img/MongoshConexion2.png" alt="Img6"></p>
+ </div>
+ </div>
 </div>
 <h3 id="bases-de-datos-y-colecciones-en-mongodb">Bases de datos y colecciones en MongoDB </h3>
 <p>Antes de profundizar en la estructura de los documentos y los tipos de datos, es importante entender cómo organiza MongoDB la información.</p>
@@ -967,7 +1038,23 @@ db<span class="token punctuation">.</span><span class="token operator">&lt;</spa
   <span class="token punctuation">{</span> <span class="token literal-property property">$set</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token string">"Senior"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
 <span class="token punctuation">)</span>
 </code></pre></div>
-<p>En ambos comandos, el operador <code>$set</code> se utiliza para especificar los campos que se desean actualizar.</p>
+<p>En ambos comandos, el operador de actualización <code>$set</code> se utiliza para especificar los campos que se desean actualizar. Además de este operador se puede utilizar el operador <code>$pull</code> para eliminar un elemento de una lista (o array) y el operador <code>$push</code> para añadir un elemento al final de la lista.</p>
+<div class="admonition example">
+<p class="admonition-title">Actualizar lista</p>
+<p>El siguiente ejemplo actuliza la lista de provincias de la <em>Comunidad Valenciana</em> eliminando la provincia <em>Murcia</em>.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">comunidades</span><span class="token punctuation">.</span><span class="token method function property-access">updateOne</span><span class="token punctuation">(</span>
+  <span class="token punctuation">{</span><span class="token string-property property">"comunidad"</span><span class="token operator">:</span><span class="token string">'Comunidad Valenciana'</span><span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">$pull</span><span class="token operator">:</span> <span class="token punctuation">{</span><span class="token string-property property">"provincias"</span><span class="token operator">:</span> <span class="token string">"Murcia"</span><span class="token punctuation">}</span> <span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+</code></pre></div>
+<div class="admonition example">
+<p class="admonition-title">Actualizar lista</p>
+<p>El siguiente ejemplo actuliza la lista de idiomas del empleado <em>Carlos</em> añadiendo el <em>Polaco</em>.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">empleados</span><span class="token punctuation">.</span><span class="token method function property-access">updateOne</span><span class="token punctuation">(</span>
+  <span class="token punctuation">{</span> <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carlos"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">$push</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"idiomas"</span><span class="token operator">:</span> <span class="token string">"Polaco"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+<span class="token punctuation">)</span>
+</code></pre></div>
 <p>El <strong>comando <code>replaceOne</code></strong> reemplaza un documento completo que coincida con el criterio especificado. Su sintaxis es la siguiente:</p>
 <pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">replaceOne</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">&lt;</span>criterio<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token operator">&lt;</span>nuevoDocumento<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
 </code></pre><p>Reemplaza el documento que coincide con el criterio proporcionado por un nuevo documento completo.</p>
@@ -1051,7 +1138,6 @@ La etapa <code>$group</code> permite agrupar documentos que comparten un mismo v
 <li><code>$avg</code>: calcula la media</li>
 <li><code>$max</code> / <code>$min</code>: obtiene el máximo y mínimo</li>
 <li><code>$count</code>: cuenta documentos</li>
-<li><code>$push</code>: añade elementos a un array</li>
 </ul>
 <p>Es el equivalente al GROUP BY de SQL.</p>
 <p>La etapa <code>$group</code> crea un nuevo documento para cada grupo, utilizando el campo <code>_id</code> para definir la clave de agrupación.</p>
@@ -1096,7 +1182,7 @@ La etapa <code>$group</code> permite agrupar documentos que comparten un mismo v
 <li>Ordena los resultados por el total de empleados en orden descendente.</li>
 </ol>
 </div>
-<h3 id="la-consola-de-mongodb">La consola de MongoDB </h3>
+<p><span style="color: red;">HASTA AQUÍ ESTÁ BIEN</span></p>
 <p><a href="https://www.mongodb.com/docs/mongodb-shell/">Documentación de The mongo Shell</a><br>
 <a href="https://www.tutorialspoint.com/mongodb">Tutorial de MongoDB</a></p>
 <p>Para instalar mongosh, (no es necesario tener instalado el servidor) lo descargaremos y lo descomprimiremos en cualquier carpeta, por ejemplo:<br>
