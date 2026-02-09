@@ -416,7 +416,11 @@ code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-fami
           </a></div>
         </div>
       </details>
-    <details style="padding:0;;padding-left:24px;" open="">
+    <div class="md-toc-link-wrapper" style="padding:0;;display:list-item;list-style:square;margin-left:42px">
+          <a href="#consultas-multitablas" class="md-toc-link">
+            <p>Consultas multitablas</p>
+
+          </a></div><details style="padding:0;;padding-left:24px;" open="">
         <summary class="md-toc-link-wrapper">
           <a href="#otras-aspectos-importantes-de-mongodb" class="md-toc-link"><p>Otras aspectos importantes de MongoDB</p>
 </a>
@@ -756,6 +760,38 @@ Dentro de ella podría haber varias colecciones:</p>
 </div>
 <h3 id="estructura-de-un-documento-mongodb">Estructura de un documento MongoDB </h3>
 <p>En MongoDB, la unidad fundamental de almacenamiento es el <strong>documento</strong>, un conjunto de <strong>pares clave–valor</strong> que se asemeja conceptualmente a un objeto JSON. Sin embargo, la representación interna se realiza mediante <strong>BSON (Binary JSON)</strong>, un formato binario optimizado que permite manejar datos de forma más eficiente y soportar tipos adicionales.</p>
+<p><strong>Diferencias entre JSON y BSON</strong></p>
+<table>
+<thead>
+<tr>
+<th>Característica</th>
+<th>JSON</th>
+<th>BSON</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Formato</td>
+<td>Texto</td>
+<td>Binario</td>
+</tr>
+<tr>
+<td>Tipos de datos</td>
+<td>Limitados (string, number, boolean, null, array, object)</td>
+<td>Ampliados (incluye tipos binarios, fechas, ObjectId, etc.)</td>
+</tr>
+<tr>
+<td>Claves y valores</td>
+<td>Requiere comillas siempre</td>
+<td>Solo se requieren comillas para valores string</td>
+</tr>
+<tr>
+<td>Eficiencia</td>
+<td>Menos eficiente para lectura/escritura</td>
+<td>Más eficiente debido a su formato binario</td>
+</tr>
+</tbody>
+</table>
 <p>Un documento MongoDB tiene las siguientes características principales:</p>
 <ul>
 <li>Es <strong>semiestructurado</strong>, lo que significa que cada documento puede poseer claves y tipos distintos.</li>
@@ -780,9 +816,21 @@ Dentro de ella podría haber varias colecciones:</p>
   <span class="token property">"aficiones"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"cine"</span><span class="token punctuation">,</span> <span class="token string">"lectura"</span><span class="token punctuation">,</span> <span class="token string">"senderismo"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
   <span class="token property">"activo"</span><span class="token operator">:</span> <span class="token boolean">true</span>
 <span class="token punctuation">}</span>
-</code></pre><p>Fijémonos que el documento contiene varios tipos de datos, que estudiaremos a continuación.<br>
-Además, las claves van entre comillas dobles, siguiendo la sintaxis JSON.</p>
-</div>
+</code></pre><p>Como se puede observar, el documento contiene varias claves con diferentes tipos de datos: un <code>ObjectId</code> para el campo <code>_id</code>, un <code>string</code> para <code>nombre</code>, un <code>int32</code> para <code>edad</code>, un subdocumento para <code>direccion</code>, un array de strings para <code>aficiones</code> y un booleano para <code>activo</code>.</p>
+<p>Como no es necesario que las claves vayan entre comillas, el documento también podría escribirse de la siguiente forma:</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code><span class="token punctuation">{</span>
+  <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token function"><span class="token maybe-class-name">ObjectId</span></span><span class="token punctuation">(</span><span class="token string">"65a2c3109d1cce001fa9d8b2"</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token string">"María"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">edad</span><span class="token operator">:</span> <span class="token number">29</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">direccion</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+    <span class="token literal-property property">calle</span><span class="token operator">:</span> <span class="token string">"Gran Vía"</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">numero</span><span class="token operator">:</span> <span class="token number">10</span><span class="token punctuation">,</span>
+    <span class="token literal-property property">ciudad</span><span class="token operator">:</span> <span class="token string">"Madrid"</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">aficiones</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"cine"</span><span class="token punctuation">,</span> <span class="token string">"lectura"</span><span class="token punctuation">,</span> <span class="token string">"senderismo"</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">activo</span><span class="token operator">:</span> <span class="token boolean">true</span>
+<span class="token punctuation">}</span>
+</code></pre></div>
 <h3 id="tipos-de-datos">Tipos de datos </h3>
 <p>BSON extiende JSON añadiendo una tipología más rica y una codificación binaria eficiente. A continuación se presenta un compendio sistemático de los <strong>tipos de datos</strong> más relevantes, su semántica, casos de uso y observaciones relacionadas con su representación.</p>
 <h4 id="tipos-primitivos">Tipos primitivos </h4>
@@ -792,6 +840,8 @@ Representa texto en codificación UTF‑8. Es el tipo más habitual para campos 
 <p class="admonition-title">String</p>
 <p>El siguiente ejemplo muestra un documento con un campo de tipo String.</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code>   <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Lucía"</span> <span class="token punctuation">}</span>
+</code></pre><p>O alternativamente, sin comillas en la clave:</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>   <span class="token punctuation">{</span> <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token string">"Lucía"</span> <span class="token punctuation">}</span>
 </code></pre></div>
 <p><strong>Number</strong><br>
 BSON distingue entre cuatro tipos numéricos optimizados para distintos rangos y precisiones:</p>
@@ -821,11 +871,11 @@ Valores lógicos <code>true</code> y <code>false</code>.</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code> <span class="token punctuation">{</span> <span class="token property">"activo"</span><span class="token operator">:</span> <span class="token boolean">true</span> <span class="token punctuation">}</span>
 </code></pre></div>
 <p><strong>El valor Null</strong><br>
-Representa un valor intencionalmente vacío y se utiliza para indicar la ausencia de un valor. Es aplicable a cualquier tipo de dato.</p>
+El valor null no es un tipo de dato realmente, se utiliza para representar un valor intencionalmente vacío y se utiliza para indicar la ausencia de un valor. Es aplicable a cualquier tipo de dato.</p>
 <div class="admonition example">
 <p class="admonition-title">Valor nulo</p>
 <p>El siguiente ejemplo muestra un documento con un campo que tiene un valor nulo.</p>
-<pre data-role="codeBlock" data-info="json" class="language-json json"><code> <span class="token punctuation">{</span> <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token null keyword">null</span> <span class="token punctuation">}</span>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code> <span class="token punctuation">{</span> <span class="token literal-property property">telefono</span><span class="token operator">:</span> <span class="token keyword null nil keyword-null">null</span> <span class="token punctuation">}</span>
 </code></pre></div>
 <h4 id="tipos-complejos">Tipos complejos </h4>
 <p><strong>Document (Documento anidado)</strong><br>
@@ -860,7 +910,7 @@ Se utilizan los corchetes <code>[]</code> para definir arrays y los elementos se
 </code></pre></div>
 <h4 id="tipos-específicos-especializados">Tipos específicos (especializados) </h4>
 <p><strong>ObjectId</strong><br>
-Identificador único de 12 bytes que se asigna por defecto al campo <code>_id</code>. Es compacto, eficiente para índices y tiene orden temporal aproximado (útil para ordenar por creación).</p>
+Identificador único de 12 bytes que se asigna por defecto al campo <code>_id</code>. El campo <code>_id</code> es un <code>ObjectId</code> que se genera automáticamente si no se proporciona uno al insertar el documento (equivalente a los campos autoincrementados en bases de datos relacionales). Este tipo de dato es especialmente útil para garantizar la unicidad de los documentos dentro de una colección y para optimizar las consultas basadas en este identificador.</p>
 <div class="admonition example">
 <p class="admonition-title">ObjectId</p>
 <p>Documento con <code>_id</code> autogenerado y un campo adicional.</p>
@@ -869,27 +919,26 @@ Identificador único de 12 bytes que se asigna por defecto al campo <code>_id</c
   <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Introducción a MongoDB"</span>
 <span class="token punctuation">}</span>
 </code></pre></div>
+<p>El <code>_id</code> es inmutable, lo que significa que una vez asignado a un documento, no puede ser modificado. Esto garantiza la integridad de los datos y permite que el sistema de indexación de MongoDB funcione de manera eficiente.</p>
+<p>Aunque no es aconsejable, es posible asignar un valor personalizado al campo <code>_id</code> al insertar un documento. Sin embargo, si se opta por esta práctica, se debe asegurar que el valor asignado sea único dentro de la colección para evitar conflictos ya que si se intenta insertar un documento con un <code>_id</code> que ya existe, MongoDB generará un error de duplicidad.</p>
 <p><strong>Date</strong><br>
 Representa fecha y hora en milisegundos desde la época UNIX (1 de enero de 1970). Se utiliza para almacenar marcas de tiempo en aplicaciones. Las fechas se almacenan en UTC y se recomienda siempre trabajar con esta zona horaria para evitar confusiones.</p>
+<p>Si estamos en España y es invierno (UTC+1), al almacenar una fecha en MongoDB tenemos que restar una hora para que se almacene correctamente en UTC. Sin embargo, si es verano (UTC+2), debemos restar dos horas.<br>
+Si lo que queremos es recuperar la fecha en la zona horaria local, debemos sumar una hora en invierno y dos horas en verano al valor almacenado en MongoDB.</p>
 <div class="admonition example">
 <p class="admonition-title">Date</p>
-<p>Documento con una marca de tiempo de creación.</p>
-<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
-  <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Entrada de blog"</span><span class="token punctuation">,</span>
-  <span class="token property">"creado_en"</span><span class="token operator">:</span> ISODate(<span class="token string">"2024-11-05T14:30:00Z"</span>)
+<p>Documento con una marca de tiempo de creación. Esto es lo que tendríamos que haber asignado a <code>fecha_creacion</code> si estamos en España, es invierno y son las 15:30 horas en horario local.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code><span class="token punctuation">{</span>
+  <span class="token literal-property property">titulo</span><span class="token operator">:</span> <span class="token string">"Entrada de blog"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">fecha_creacion</span><span class="token operator">:</span> <span class="token function"><span class="token maybe-class-name">ISODate</span></span><span class="token punctuation">(</span><span class="token string">"2024-11-05T14:30:00Z"</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre><p>Alternativamente, podríamos haber proporcionado el offset (<code>±hh:mm</code>) de la zona horaria local, lo que indicaría que la fecha se ha proporcionado en la zona horaria local. En ese caso, MongoDB interpretaría la fecha como si estuviera en la zona horaria local y la convertiría a UTC automáticamente al almacenarla.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code><span class="token punctuation">{</span>
+  <span class="token literal-property property">titulo</span><span class="token operator">:</span> <span class="token string">"Entrada de blog"</span><span class="token punctuation">,</span>
+  <span class="token literal-property property">fecha_creacion</span><span class="token operator">:</span> <span class="token function"><span class="token maybe-class-name">ISODate</span></span><span class="token punctuation">(</span><span class="token string">"2024-11-05T15:30:00-01:00"</span><span class="token punctuation">)</span>
 <span class="token punctuation">}</span>
 </code></pre></div>
-<p><strong>Timestamp</strong><br>
-Marca de tiempo con semántica interna utilizada por el sistema para replicación y operaciones internas. Para campos de negocio suele preferirse <code>Date</code>.</p>
-<div class="admonition example">
-<p class="admonition-title">Timestamp</p>
-<p>Documento con un <code>Timestamp</code> (normalmente no requerido a nivel de aplicación).</p>
-<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
-  <span class="token property">"evento"</span><span class="token operator">:</span> <span class="token string">"sincronizacion"</span><span class="token punctuation">,</span>
-  <span class="token property">"ts"</span><span class="token operator">:</span> Timestamp(<span class="token number">1706600000</span><span class="token punctuation">,</span> <span class="token number">1</span>)
-<span class="token punctuation">}</span>
-</code></pre></div>
-<p>Además de los tipos mencionados, BSON incluye otros tipos especializados como <strong>Binary Data</strong>, <strong>Regular Expression</strong>, <strong>Code</strong> y los valores centinela <strong>MinKey</strong> y <strong>MaxKey</strong>.</p>
+<p>Además de los tipos mencionados, BSON incluye otros tipos especializados como <strong>Timestamp</strong>, <strong>Binary Data</strong>, <strong>Regular Expression</strong>, <strong>Code</strong> y los valores centinela <strong>MinKey</strong> y <strong>MaxKey</strong>.</p>
 <h3 id="operadores-en-mongodb">Operadores en MongoDB </h3>
 <p>MongoDB proporciona una amplia gama de operadores que permiten realizar consultas, actualizaciones y manipulaciones de datos de manera eficiente. Estos operadores se clasifican en varias categorías según su función:</p>
 <ul>
@@ -1073,6 +1122,18 @@ Marca de tiempo con semántica interna utilizada por el sistema para replicació
 <td><code>$project</code></td>
 <td>Modifica la forma de los documentos en la salida, incluyendo o excluyendo campos</td>
 </tr>
+<tr>
+<td><code>$limit</code></td>
+<td>Limita el número de documentos en la salida</td>
+</tr>
+<tr>
+<td><code>$unwind</code></td>
+<td>Descompone un array en documentos individuales</td>
+</tr>
+<tr>
+<td><code>$lookup</code></td>
+<td>Realiza una operación de join con otra colección</td>
+</tr>
 </tbody>
 </table>
 </li>
@@ -1228,6 +1289,8 @@ Marca de tiempo con semántica interna utilizada por el sistema para replicació
 </table>
 </li>
 </ul>
+<p>Esta es solo una selección de los operadores más comunes en MongoDB. La plataforma ofrece una amplia variedad de operadores adicionales para cubrir una gran cantidad de casos de uso y necesidades específicas.</p>
+<p>Hay que tener en cuenta que algunos de estos operadores solo están disponibles en el marco de agregación, mientras que otros pueden ser utilizados con cualquiera de los métodos de consulta o actualización. Es importante consultar la documentación oficial de MongoDB para conocer la sintaxis exacta y las opciones disponibles para cada operador.</p>
 <h3 id="gestión-de-bases-de-datos-y-colecciones">Gestión de bases de datos y colecciones </h3>
 <p>Trabajar con MongoDB implica interactuar con el sistema a través de mongosh, la consola oficial del SGBD. Aunque MongoDB es una base de datos orientada a documentos, sus comandos mantienen cierta similitud conceptual con los del SQL tradicional: seleccionar bases de datos, consultar información, insertar documentos... pero con una sintaxis y filosofía propia del modelo NoSQL.<br>
 A continuación se presentan los comandos más habituales, acompañados de explicaciones y ejemplos que ilustran su función dentro del flujo de desarrollo.</p>
@@ -1279,7 +1342,8 @@ El comando <code>drop</code> elimina una colección completa junto con todos sus
 <p><strong>Consultas elementales</strong><br>
 El comando <code>find</code> nos permite recuperar documentos de una colección. Este comando puede aceptar criterios de búsqueda para filtrar los resultados. Su sintaxis es la siguiente:</p>
 <pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">&lt;</span>criterio<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
-</code></pre><div class="admonition example">
+</code></pre><p>donde <code>&lt;criterio&gt;</code> es un objeto en formato JSON que especifica las condiciones que deben cumplir los documentos para ser incluidos en el resultado. Si no se proporciona ningún criterio, el comando <code>find</code> devolverá todos los documentos de la colección.</p>
+<div class="admonition example">
 <p class="admonition-title">Comando find</p>
 <p>Para obtener todos los documentos de la colección <code>empleados</code>, se ejecutaría:</p>
 <pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">empleados</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">)</span>
@@ -1306,8 +1370,9 @@ El comando <code>find</code> nos permite recuperar documentos de una colección.
 </code></pre></div>
 <p><strong>Selección de campos en consultas (proyección)</strong><br>
 Para especificar qué campos se desean incluir o excluir en los resultados de una consulta, se puede utilizar el segundo argumento del método <code>find()</code>, conocido como <strong>proyección</strong>. Este argumento es un objeto que indica con un valor de 1 los campos que se desean incluir y con un valor de 0 los campos que se desean excluir. Su sintaxis es la siguiente:</p>
-<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">&lt;</span>criterio<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token operator">&lt;</span>campo1<span class="token operator">&gt;</span><span class="token operator">:</span> <span class="token operator">&lt;</span>incluir<span class="token operator">/</span>excluir<span class="token operator">&gt;</span><span class="token punctuation">,</span> <span class="token operator">&lt;</span>campo2<span class="token operator">&gt;</span><span class="token operator">:</span> <span class="token operator">&lt;</span>incluir<span class="token operator">/</span>excluir<span class="token operator">&gt;</span><span class="token punctuation">,</span> <span class="token spread operator">...</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
-</code></pre><div class="admonition example">
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">&lt;</span>criterio<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token operator">&lt;</span>campo1<span class="token operator">&gt;</span><span class="token operator">:</span> <span class="token operator">&lt;</span>incluir<span class="token operator">|</span>excluir<span class="token operator">&gt;</span><span class="token punctuation">,</span> <span class="token operator">&lt;</span>campo2<span class="token operator">&gt;</span><span class="token operator">:</span> <span class="token operator">&lt;</span>incluir<span class="token operator">|</span>excluir<span class="token operator">&gt;</span><span class="token punctuation">,</span> <span class="token spread operator">...</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre><p>donde <code>incluir</code> se representa con el valor 1 y <code>excluir</code> con el valor 0.</p>
+<div class="admonition example">
 <p class="admonition-title">Selección de campos</p>
 <p>Para obtener solo los nombres y edades de los empleados, se ejecutaría:</p>
 <pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">empleados</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span>
@@ -1340,7 +1405,7 @@ Vamos a ver como se pueden utilizar operadores de comparación y lógicos para c
     <span class="token punctuation">{</span> <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token punctuation">{</span> $<span class="token keyword keyword-in">in</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"Ventas"</span><span class="token punctuation">,</span> <span class="token string">"Marketing"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
 <span class="token punctuation">)</span>
 </code></pre></div>
-<p>Se pueden combinar múltiples condiciones utilizando operadores lógicos como <code>$and</code>, <code>$or</code> y <code>$not</code>.</p>
+<p>Se pueden combinar múltiples condiciones utilizando operadores lógicos como <code>$and</code>, <code>$or</code> y <code>$not</code>. En este caso, el criterio de búsqueda se define como un objeto que contiene un operador lógico con una lista (array) de condiciones.</p>
 <div class="admonition example">
 <p class="admonition-title">Condiciones compuestas</p>
 <p>Para filtrar empleados que son mayores de 30 años y pertenecen al departamento de <em>Ventas</em>, se ejecutaría:</p>
@@ -1462,8 +1527,40 @@ Algunos de los operadores más comunes para consultas sobre arrays son:</p>
     <span class="token punctuation">{</span> <span class="token string-property property">"aficiones"</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">$all</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"cine"</span><span class="token punctuation">,</span> <span class="token string">"yoga"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
 <span class="token punctuation">)</span>
 </code></pre></div>
+<p><strong>Uso del metodo forEach</strong><br>
+El método <code>forEach()</code> se puede utilizar para iterar sobre los documentos devueltos por una consulta y realizar operaciones específicas en cada documento. Este método acepta una función de callback que se ejecuta para cada documento en el cursor de resultados. Su sintaxis es la siguiente:</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">&lt;</span>criterio<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">forEach</span><span class="token punctuation">(</span><span class="token keyword keyword-function">function</span><span class="token punctuation">(</span><span class="token parameter">documento</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Operaciones a realizar con cada documento</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre><p>Es habitual pasar una función anónima como callback, aunque también se puede definir una función por separado y luego pasarla como argumento a <code>forEach()</code>.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token operator">&lt;</span>criterio<span class="token operator">&gt;</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">forEach</span><span class="token punctuation">(</span><span class="token parameter">documento</span> <span class="token arrow operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// Operaciones a realizar con cada documento</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre><p>Un uso común del método <code>forEach()</code> es imprimir unos campos específicos de cada documento en la consola. Para ello, se puede utilizar la función <code>print()</code> dentro del callback. La salida seria similar a la que muestran las consultas en las bases de datos relacionales, pero con la flexibilidad de poder formatear la salida a nuestro gusto.</p>
+<div class="admonition example">
+<p class="admonition-title">Uso del método forEach</p>
+<p>Queremos saber qué equipos de nuestra base de datos de la NBA pertenecen a la división <em>SouthEast</em> y mostrar su <code>nombre</code> y <code>ciudad</code>.<br>
+Si no utilizamos <code>forEach()</code>, la consulta sería la siguiente:</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">equipos</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token literal-property property">Division</span><span class="token operator">:</span> <span class="token string">"SouthEast"</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token literal-property property">_id</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">Nombre</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">Ciudad</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+</code></pre><p>y nos mostraría la salida como una lista de documentos JSON:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>[
+    { Nombre: 'Bobcats', Ciudad: 'Charlotte' },
+    { Nombre: 'Hawks', Ciudad: 'Atlanta' },
+    { Nombre: 'Heat', Ciudad: 'Miami' },
+    { Nombre: 'Magic', Ciudad: 'Orlando' },
+    { Nombre: 'Wizards', Ciudad: 'Washington' }
+]
+</code></pre><p>Si utilizamos <code>forEach()</code>, podemos mostrar solo el nombre y la ciudad de cada equipo, separados por una tabulación, lo que nos daría una salida más limpia y fácil de leer:</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">equipos</span><span class="token punctuation">.</span><span class="token method function property-access">find</span><span class="token punctuation">(</span><span class="token punctuation">{</span><span class="token literal-property property">Division</span><span class="token operator">:</span> <span class="token string">"SouthEast"</span><span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">{</span><span class="token literal-property property">_id</span><span class="token operator">:</span><span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">Nombre</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">Ciudad</span><span class="token operator">:</span><span class="token number">1</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">.</span><span class="token method function property-access">forEach</span><span class="token punctuation">(</span><span class="token parameter">doc</span> <span class="token arrow operator">=&gt;</span> <span class="token function">print</span><span class="token punctuation">(</span>doc<span class="token punctuation">.</span><span class="token property-access"><span class="token maybe-class-name">Nombre</span></span> <span class="token operator">+</span> <span class="token string">"\t"</span><span class="token punctuation">,</span> doc<span class="token punctuation">.</span><span class="token property-access"><span class="token maybe-class-name">Ciudad</span></span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+</code></pre><p>Esto nos mostraría lo suguiente:</p>
+<pre data-role="codeBlock" data-info="text" class="language-text text"><code>Bobcats  Charlotte
+Hawks    Atlanta
+Heat     Miami
+Magic    Orlando
+Wizards  Washington
+</code></pre></div>
 <h4 id="consultas-de-agregación-aggregation-framework">Consultas de agregación (Aggregation Framework) </h4>
-<p>El <strong>Aggregation Framework</strong> de MongoDB permite realizar consultas avanzadas y transformar datos mediante un conjunto de etapas encadenadas, conocidas como <em>pipeline</em>. Cada etapa aplica una operación específica, como filtrado (<code>$match</code>), agrupamiento (<code>$group</code>), ordenamiento (<code>$sort</code>) o proyección (<code>$project</code>), facilitando el análisis y procesamiento flexible de la información.</p>
+<p>El <strong>Aggregation Framework</strong> de MongoDB permite realizar consultas avanzadas y transformar datos mediante un conjunto de etapas encadenadas, conocidas como <em>pipeline</em>. En el procesamiento <em>pipeline</em> el resultado de cada etapa se pasa a la siguiente que lo utiliza como entrada. Cada etapa aplica una operación específica, como filtrado (<code>$match</code>), agrupamiento (<code>$group</code>), ordenamiento (<code>$sort</code>) o proyección (<code>$project</code>), facilitando el análisis y procesamiento flexible de la información.</p>
 <p>Para utilizarlo, se emplea el método <code>aggregate()</code>, que recibe un array de etapas. El resultado de cada etapa se pasa a la siguiente, permitiendo construir consultas complejas:</p>
 <pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token operator">&lt;</span>nombreColeccion<span class="token operator">&gt;</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
     <span class="token punctuation">{</span> <span class="token operator">&lt;</span>etapa1<span class="token operator">&gt;</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token operator">&lt;</span>operadores<span class="token operator">&gt;</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
@@ -1623,6 +1720,7 @@ El operador <code>$group</code> permite agrupar documentos por un campo específ
 <span class="token punctuation">]</span><span class="token punctuation">)</span>
 </code></pre></div>
 <p>Como se puede observar podemos realizar consultas muy complejas utilizando el Aggregation Framework.</p>
+<p>También se pueden realizar consultas que involucren operaciones de join entre colecciones utilizando el operador <code>$lookup</code>, y consultas que descompongan arrays en documentos individuales utilizando el operador <code>$unwind</code>, entre otras posibilidades avanzadas. Esto se verá posteriormente en la sección de relaciones entre colecciones.</p>
 <h3 id="actualización-de-documentos-en-colecciones">Actualización de documentos en colecciones </h3>
 <p>Sobre los documentos almacenados en las colecciones, es posible realizar diversas operaciones de actualización para modificar su contenido. MongoDB proporciona comandos específicos para actualizar documentos de manera eficiente, permitiendo tanto modificaciones puntuales como actualizaciones masivas.</p>
 <h4 id="insertar-documentos">Insertar documentos </h4>
@@ -1651,6 +1749,32 @@ db<span class="token punctuation">.</span><span class="token operator">&lt;</spa
     <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Luis"</span><span class="token punctuation">,</span>
     <span class="token string-property property">"edad"</span><span class="token operator">:</span> <span class="token number">45</span><span class="token punctuation">,</span>
     <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token string">"Finanzas"</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span>
+</code></pre></div>
+<p>A diferencia de las bases de datos relacionales, en MongoDB no es necesario definir un esquema rígido para los documentos antes de insertarlos. Esto significa que cada documento puede tener una estructura diferente, aunque generalmente se recomienda mantener cierta consistencia en la estructura de los documentos dentro de una colección para facilitar su gestión y consulta.</p>
+<div class="admonition example">
+<p class="admonition-title">Insertar documentos con estructura diferente</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">empleados</span><span class="token punctuation">.</span><span class="token method function property-access">insertMany</span><span class="token punctuation">(</span><span class="token punctuation">[</span>
+  <span class="token punctuation">{</span>
+    <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"María"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"edad"</span><span class="token operator">:</span> <span class="token number">30</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token string">"Recursos Humanos"</span><span class="token punctuation">,</span>
+    <span class="token string-property property">"idiomas"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"Español"</span><span class="token punctuation">,</span> <span class="token string">"Francés"</span><span class="token punctuation">]</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+      <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Jorge"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"edad"</span><span class="token operator">:</span> <span class="token number">40</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token string">"Tecnología"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"proyectos"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+          <span class="token punctuation">{</span> <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Proyecto A"</span><span class="token punctuation">,</span> <span class="token string-property property">"duración"</span><span class="token operator">:</span> <span class="token number">6</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+          <span class="token punctuation">{</span> <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Proyecto B"</span><span class="token punctuation">,</span> <span class="token string-property property">"duración"</span><span class="token operator">:</span> <span class="token number">12</span> <span class="token punctuation">}</span>
+      <span class="token punctuation">]</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+      <span class="token string-property property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Sofía"</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"edad"</span><span class="token operator">:</span> <span class="token number">27</span><span class="token punctuation">,</span>
+      <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token string">"Administrativo"</span><span class="token punctuation">,</span>
   <span class="token punctuation">}</span>
 <span class="token punctuation">]</span><span class="token punctuation">)</span>
 </code></pre></div>
@@ -1720,52 +1844,7 @@ db<span class="token punctuation">.</span><span class="token operator">&lt;</spa
 <pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">empleados</span><span class="token punctuation">.</span><span class="token method function property-access">deleteMany</span><span class="token punctuation">(</span><span class="token punctuation">{</span> <span class="token string-property property">"departamento"</span><span class="token operator">:</span> <span class="token string">"Ventas"</span> <span class="token punctuation">}</span><span class="token punctuation">)</span>
 </code></pre></div>
 <h3 id="uso-básico-de-mongodb-compass">Uso básico de MongoDB Compass </h3>
-<p><strong>Inserción de documentos</strong><br>
-Para insertar documentos en una colección utilizando MongoDB Compass, se deben seguir los siguientes pasos:</p>
-<ol>
-<li>Seleccionar la base de datos y la colección donde se desea insertar el documento.</li>
-<li>Hacer clic en el botón "Insert Document" (Insertar documento) ubicado en la parte superior derecha de la interfaz.</li>
-<li>Se abrirá un formulario donde se pueden ingresar los campos y valores del documento a insertar. Es posible agregar campos adicionales haciendo clic en el botón "Add Field" (Agregar campo).</li>
-<li>Una vez completado el formulario, hacer clic en el botón "Insert" (Insertar) para agregar el documento a la colección.</li>
-</ol>
-<p>El nuevo documento aparecerá en la lista de documentos de la colección.</p>
-<p>El siguiente vídeo ilusta el proceso.<br>
-<a href="https://www.youtube.com/watch?v=VIDEO_ID"><img src="https://img.youtube.com/vi/VIDEO_ID/0.jpg" alt="Insertar documento en MongoDB Compass"></a></p>
-<p><strong>Modificación de documentos</strong><br>
-Para modificar documentos en una colección utilizando MongoDB Compass, se deben seguir los siguientes pasos:</p>
-<ol>
-<li>Seleccionar la base de datos y la colección donde se encuentra el documento que se desea modificar.</li>
-<li>Buscar el documento que se desea modificar en la lista de documentos de la colección.</li>
-<li>Hacer clic en el botón "Edit" (Editar) ubicado junto al documento que se desea modificar.</li>
-<li>Se abrirá un formulario donde se pueden editar los campos y valores del documento. Es posible agregar campos adicionales haciendo clic en el botón "Add Field" (Agregar campo) o eliminar campos existentes haciendo clic en el botón "Remove Field" (Eliminar campo).</li>
-<li>Una vez completada la edición, hacer clic en el botón "Update" (Actualizar) para guardar los cambios en el documento.</li>
-</ol>
-<p>El documento modificado se actualizará en la lista de documentos de la colección.</p>
-<p>El siguiente vídeo ilustra el proceso.<br>
-<a href="https://www.youtube.com/watch?v=VIDEO_ID"><img src="https://img.youtube.com/vi/VIDEO_ID/0.jpg" alt="Modificar documento en MongoDB Compass"></a></p>
-<p><strong>Eliminación de documentos</strong><br>
-Para eliminar documentos en una colección utilizando MongoDB Compass, se deben seguir los siguientes pasos:</p>
-<ol>
-<li>Seleccionar la base de datos y la colección donde se encuentra el documento que se desea eliminar.</li>
-<li>Buscar el documento que se desea eliminar en la lista de documentos de la colección.</li>
-<li>Hacer clic en el botón "Delete" (Eliminar) ubicado junto al documento que se desea eliminar.</li>
-<li>Se abrirá una ventana de confirmación para asegurarse de que se desea eliminar el documento. Hacer clic en el botón "Confirm" (Confirmar) para eliminar el documento de la colección.</li>
-</ol>
-<p>El documento eliminado desaparecerá de la lista de documentos de la colección.</p>
-<p>El siguiente vídeo ilustra el proceso.<br>
-<a href="https://www.youtube.com/watch?v=VIDEO_ID"><img src="https://img.youtube.com/vi/VIDEO_ID/0.jpg" alt="Eliminar documento en MongoDB Compass"></a></p>
-<p><strong>Consulta de documentos</strong><br>
-Para consultar documentos en una colección utilizando MongoDB Compass, se deben seguir los siguientes pasos:</p>
-<ol>
-<li>Seleccionar la base de datos y la colección donde se desea realizar la consulta.</li>
-<li>En la barra de búsqueda ubicada en la parte superior de la interfaz, ingresar los criterios de búsqueda utilizando la sintaxis de consulta de MongoDB. Por ejemplo, para buscar documentos donde el campo "nombre" sea igual a "Carlos", se puede ingresar <code>{ "nombre": "Carlos" }</code>.</li>
-<li>Hacer clic en el botón "Find" (Buscar) para ejecutar la consulta.</li>
-<li>Los documentos que coincidan con los criterios de búsqueda se mostrarán en la lista de documentos de la colección.</li>
-<li>Es posible ordenar los resultados de la consulta haciendo clic en los encabezados de las columnas o utilizando el botón "Sort" (Ordenar) para especificar los campos y el orden de clasificación.</li>
-<li>También es posible limitar el número de resultados utilizando el botón "Limit" (Limitar) para establecer un límite en la cantidad de documentos que se mostrarán.</li>
-</ol>
-<p>El siguiente vídeo ilustra el proceso.<br>
-<a href="https://www.youtube.com/watch?v=VIDEO_ID"><img src="https://img.youtube.com/vi/VIDEO_ID/0.jpg" alt="Consultar documentos en MongoDB Compass"></a></p>
+<p style="color: red; font-weight: bold; margin: 0.5rem 0;">Sección en construcción.</p>
 <h3 id="modelado-de-datos-en-mongodb">Modelado de datos en MongoDB </h3>
 <p>El modelado de datos en MongoDB se basa en la flexibilidad de los documentos BSON, lo que permite adaptar la estructura de la base de datos a las necesidades reales de la aplicación, a diferencia del modelo relacional tradicional. Esta flexibilidad facilita la optimización del rendimiento y la adecuación a los patrones de acceso más frecuentes. Tenemos dos estrategias principales para modelar las relaciones entre documentos:</p>
 <ul>
@@ -1773,27 +1852,28 @@ Para consultar documentos en una colección utilizando MongoDB Compass, se deben
 <li><strong>Modelo referenciado (referencing)</strong>: en este modelo, los documentos se relacionan mediante identificadores, de forma similar a las claves foráneas en bases de datos relacionales. Es adecuado para relaciones complejas o cuando los datos asociados pueden crecer mucho o ser compartidos.</li>
 </ul>
 <p>A la hora de elegir entre estas dos estrategias, es importante considerar factores como la frecuencia de acceso a los datos, la necesidad de atomicidad en las operaciones, el tamaño de los documentos y la posibilidad de duplicación de información.</p>
-<p>Relaciones 1–N, N–N, y 1–1 pueden ser modeladas tanto con embedding como con referencing, dependiendo de las necesidades específicas de la aplicación y del patrón de acceso a los datos.</p>
+<p>Relaciones 1–N, N–N, y 1–1 pueden ser modeladas utilizando tanto el modelo embebido como el modelo referenciado, dependiendo de las necesidades específicas de la aplicación y del patrón de acceso a los datos.</p>
+<p>Como norma general, el modelo embebido suele ser más eficiente para relaciones 1-1 y 1-N, ya que permite acceder a toda la información relacionada en una sola consulta. Sin embargo, el modelo referenciado puede ser más adecuado para relaciones M-N o cuando los datos relacionados pueden crecer de manera significativa o ser compartidos entre múltiples documentos.</p>
 <h4 id="relaciones-1-1">Relaciones 1-1 </h4>
 <p>A continuación se muestran ejemplos de cómo modelar una relación 1-1 entre una persona y su pasaporte utilizando tanto embedding como referencing.<br>
 Suponemmos que tenemos una <strong>persona</strong> con los siguientes datos:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span>
 <span class="token punctuation">}</span>
-</code></pre><p>y una <strong>documentación</strong> con los siguientes datos:</p>
+</code></pre><p>y una <strong>documentación</strong> para esa persona con los siguientes datos:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
     <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12341234T"</span><span class="token punctuation">,</span>
     <span class="token property">"seguridad_social"</span><span class="token operator">:</span> <span class="token string">"234298237PRQ"</span>
 <span class="token punctuation">}</span>
 </code></pre><div class="admonition example">
-<p class="admonition-title">Metódo embedding para relación 1-1</p>
-<p>Para modelar una relación 1-1 entre una persona y su documentación utilizando embedding, se podría estructurar el documento de la siguiente manera:</p>
+<p class="admonition-title">Metódo <em>embedding</em> para relación 1-1</p>
+<p>Para modelar una relación 1-1 entre una persona y su documentación utilizando <em>embedding</em>, se podría estructurar el documento de la siguiente manera:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span><span class="token punctuation">,</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span><span class="token punctuation">,</span>
     <span class="token property">"documentacion"</span><span class="token operator">:</span> <span class="token punctuation">{</span>
         <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12341234T"</span><span class="token punctuation">,</span>
         <span class="token property">"seguridad_social"</span><span class="token operator">:</span> <span class="token string">"234298237PRQ"</span>
@@ -1801,30 +1881,30 @@ Suponemmos que tenemos una <strong>persona</strong> con los siguientes datos:</p
 <span class="token punctuation">}</span>
 </code></pre></div>
 <div class="admonition example">
-<p class="admonition-title">Método referencing para relación 1-1</p>
-<p>Para modelar una relación 1-1 entre una persona y su documentación utilizando referencing, se podrían tener dos documentos separados:</p>
+<p class="admonition-title">Método <em>referencing</em> para relación 1-1</p>
+<p>Para modelar una relación 1-1 entre una persona y su documentación utilizando <em>referencing</em>, se podrían tener dos documentos separados:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token comment">// personas</span>
 <span class="token punctuation">{</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span><span class="token punctuation">,</span>
-    <span class="token property">"documentacion_id"</span><span class="token operator">:</span> <span class="token number">1</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span><span class="token punctuation">,</span>
+    <span class="token property">"documentacion_id"</span><span class="token operator">:</span> <span class="token string">"1"</span>
 <span class="token punctuation">}</span>
 <span class="token comment">// documentacion</span>
 <span class="token punctuation">{</span>
-    <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
     <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12341234T"</span><span class="token punctuation">,</span>
     <span class="token property">"seguridad_social"</span><span class="token operator">:</span> <span class="token string">"234298237PRQ"</span>
 <span class="token punctuation">}</span>
 </code></pre><p>En este último caso, el documento de la persona contiene una referencia al documento de la documentación mediante el campo <code>documentacion_id</code>.</p>
 </div>
 <h4 id="relaciones-1-n">Relaciones 1-N </h4>
-<p>A continuación se muestran ejemplos de cómo modelar una relación 1-N entre una persona y sus vehículos utilizando tanto embedding como referencing.<br>
+<p>A continuación se muestran ejemplos de cómo modelar una relación 1-N entre una persona y sus vehículos utilizando tanto <em>embedding</em> como <em>referencing</em>.<br>
 Supongamos que tenemos una <strong>persona</strong> con los siguientes datos:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span>
 <span class="token punctuation">}</span>
 </code></pre><p>y una lista de <strong>vehículos</strong> con los siguientes datos:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
@@ -1832,142 +1912,496 @@ Supongamos que tenemos una <strong>persona</strong> con los siguientes datos:</p
     <span class="token punctuation">{</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"3344CCF"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Ford"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Focus"</span> <span class="token punctuation">}</span>
 <span class="token punctuation">]</span>
 </code></pre><div class="admonition example">
-<p class="admonition-title">Método embedding para relación 1-N</p>
+<p class="admonition-title">Método <em>embedding</em> para relación 1-N</p>
 <p>Para modelar una relación 1-N entre una persona y sus vehículos utilizando embedding, se podría estructurar el documento de la siguiente manera:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span><span class="token punctuation">,</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span><span class="token punctuation">,</span>
     <span class="token property">"vehiculos"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
         <span class="token punctuation">{</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"1111AAA"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Toyota"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Corolla"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
         <span class="token punctuation">{</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"3344CCF"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Ford"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Focus"</span> <span class="token punctuation">}</span>
     <span class="token punctuation">]</span>
 <span class="token punctuation">}</span>
 </code></pre></div>
-<p>Para el caso referenciado, tenemos dos posiblidades de modelar la relación 1-N entre una persona y sus vehículos utilizando referencing. En la primera opción, el documento de la persona contiene una lista de referencias a los documentos de los vehículos. En la segunda opción, cada documento de vehículo contiene una referencia al documento de la persona.</p>
+<p>Para el caso referenciado, tenemos dos posiblidades de modelar la relación 1-N entre una persona y sus vehículos utilizando <em>referencing</em>. En la primera opción, el documento de la persona contiene una lista de referencias a los documentos de los vehículos. En la segunda opción, cada documento de vehículo contiene una referencia al documento de la persona.</p>
 <div class="admonition example">
-<p class="admonition-title">Método referencing para relación 1-N</p>
+<p class="admonition-title">Método <em>referencing</em> para relación 1-N</p>
 <p>Modelo con referencias en la persona:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token comment">// personas</span>
 <span class="token punctuation">{</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span><span class="token punctuation">,</span>
-    <span class="token property">"vehiculos"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">2</span><span class="token punctuation">]</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span><span class="token punctuation">,</span>
+    <span class="token property">"vehiculos"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"1"</span><span class="token punctuation">,</span> <span class="token string">"2"</span><span class="token punctuation">]</span>
 <span class="token punctuation">}</span>
 <span class="token comment">// vehiculos</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"1111AAA"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Toyota"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Corolla"</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"3344CCF"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Ford"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Focus"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"1111AAA"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Toyota"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Corolla"</span> <span class="token punctuation">}</span>
+<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span> <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"3344CCF"</span><span class="token punctuation">,</span> <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Ford"</span><span class="token punctuation">,</span> <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Focus"</span> <span class="token punctuation">}</span>
 </code></pre></div>
 <div class="admonition example">
 <p class="admonition-title">Método referencing para relación 1-N</p>
 <p>Modelo con referencias en los vehículos:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token comment">// personas</span>
 <span class="token punctuation">{</span>
-    <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+    <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
     <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Miguel"</span><span class="token punctuation">,</span>
     <span class="token property">"apellidos"</span><span class="token operator">:</span> <span class="token string">"Sánchez"</span><span class="token punctuation">,</span>
-    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token number">555345623</span>
+    <span class="token property">"telefono"</span><span class="token operator">:</span> <span class="token string">"555345623"</span>
 <span class="token punctuation">}</span>
 <span class="token comment">// vehiculos</span>
 <span class="token punctuation">{</span>
     <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"1111AAA"</span><span class="token punctuation">,</span>
     <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Toyota"</span><span class="token punctuation">,</span>
     <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Corolla"</span><span class="token punctuation">,</span>
-    <span class="token property">"persona"</span><span class="token operator">:</span> <span class="token number">1</span>
+    <span class="token property">"persona"</span><span class="token operator">:</span> <span class="token string">"1"</span>
 <span class="token punctuation">}</span>
 <span class="token punctuation">{</span>
     <span class="token property">"matricula"</span><span class="token operator">:</span> <span class="token string">"3344CCF"</span><span class="token punctuation">,</span>
     <span class="token property">"marca"</span><span class="token operator">:</span> <span class="token string">"Ford"</span><span class="token punctuation">,</span>
     <span class="token property">"modelo"</span><span class="token operator">:</span> <span class="token string">"Focus"</span><span class="token punctuation">,</span>
-    <span class="token property">"persona"</span><span class="token operator">:</span> <span class="token number">1</span>
+    <span class="token property">"persona"</span><span class="token operator">:</span> <span class="token string">"1"</span>
 <span class="token punctuation">}</span>
 </code></pre><p>Esto es equivalente a tener una clave foránea en el modelo relacional que apunta a la tabla de personas.</p>
 </div>
+<p>En una relación 1-N con el modelo referenciado, el guardar todas las referencias a los documentos relacionados en el documento principal puede resultar en un documento muy grande si la cantidad de documentos relacionados es considerable. En este caso, es recomendable utilizar el modelo referenciado con referencias en los documentos relacionados para evitar problemas de tamaño de documento y mejorar el rendimiento de las consultas.<br>
+También se puede optar por mantener tanto la lista de referencias en el documento principal como las referencias en los documentos relacionados, aunque esto puede llevar a una duplicación de información y a la necesidad de mantener la consistencia entre ambos conjuntos de referencias. Por eso, esta opción no es la más recomendable.</p>
+<p><strong>Migración de relaciones 1-N de un modelo relacional a MongoDB</strong><br>
+En el supuesto que queramos migrar de una base de datos relacional a MongoDB y decidimos utilizar el <strong>modelo embebido</strong> para modelar una relación 1-N, hay que tener en cuenta que en muchas ocasiones los campos identificadores en el modelo relacional no forman parte de los documentos embebidos, ya que no son necesarios para identificar los documentos dentro del documento principal. Sin embargo, se pueden incluir si representan información relevante o si se desea mantener una referencia explícita a los identificadores originales de la base de datos relacional.<br>
+Los campos que actúan como claves foráneas en el modelo relacional se pueden excluir, si nos interesa, del documento embebido ya que aparecen dentro del documento principal.</p>
+<p>Para los <strong>modelos referenciados</strong>, podemos mantener los campos identificadores como parte de los documentos referenciados para preservar la relación entre los documentos y facilitar la consulta y actualización de los datos relacionados. O bien, podemos optar por no incluir los campos identificadores en los documentos referenciados si consideramos que no son necesarios para la identificación de los documentos dentro de la colección de MongoDB, y en su lugar, utilizar el campo <code>_id</code> generado automáticamente por MongoDB como identificador único para cada documento. En este caso, las referencias entre los documentos se establecerían utilizando el campo <code>_id</code> en lugar de los campos identificadores originales del modelo relacional.</p>
 <h4 id="relaciones-m-n">Relaciones M-N </h4>
 <p>A continuación se muestran ejemplos de cómo modelar una relación M-N entre libros y autores utilizando tanto embedding como referencing.<br>
-Supongamos que tenemos una lista de <strong>libros</strong> con los siguientes datos:</p>
+Supongamos que queremos modelar una relación M-N entre profesores y materias. Tenemos una colección de <strong>profesores</strong> con los siguientes datos:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
-  <span class="token punctuation">{</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-0307474728"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Cien años de soledad"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Novela"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8499082479"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Tokio Blues"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Ficción"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8466350540"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Kafka en la orilla"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Fantasía"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8498387087"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"El cuento de la criada"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Distopía"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8433972461"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Alias Grace"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Histórica"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8433975011"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Oryx y Crake"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Ciencia ficción"</span> <span class="token punctuation">}</span>    
+    <span class="token punctuation">{</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12345678A"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ana López"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Titular"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"23456789B"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Bruno García"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Asociado"</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"34567890C"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carla Sánchez"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">]</span>
-</code></pre><p>y otra de <strong>autores</strong> con los siguientes datos:</p>
+</code></pre><p>y otra de <strong>materias</strong> con los siguientes datos:</p>
+<pre data-role="codeBlock" data-info="json" class="language-json json"><code>    <span class="token punctuation">{</span><span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Álgebra Lineal"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span><span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span><span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Estadística"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span><span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ecuaciones Diferenciales"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span> <span class="token punctuation">}</span>
+</code></pre><p>Utilizando la <strong>estrategia de embedding</strong>, podríamos almacenar la información de las materias dentro de cada documento de profesor, lo que permitiría acceder a toda la información relacionada con un profesor en una sola consulta.</p>
+<p>En este caso para los <strong>profesores</strong> tenemos lo siguiente:</p>
 <pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
-  <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Gabriel García Márquez"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Colombiana"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Haruki Murakami"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Japonesa"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
-  <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Margaret Atwood"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Canadiense"</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12345678A"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ana López"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Titular"</span>
+        <span class="token property">"materias"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Álgebra Lineal"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"23456789B"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Bruno García"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Asociado"</span>
+        <span class="token property">"materias"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Estadística"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ecuaciones Diferenciales"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"34567890C"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carla Sánchez"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span>
+        <span class="token property">"materias"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Estadística"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ecuaciones Diferenciales"</span><span class="token punctuation">,</span> <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span> <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
 <span class="token punctuation">]</span>
-</code></pre><div class="admonition example">
-<p class="admonition-title">Método embedding para relación M-N</p>
-<p>Para modelar una relación M-N entre libros y autores utilizando embedding, se podría estructurar el documento de la siguiente manera:</p>
-<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">{</span>
-    <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-0307474728"</span><span class="token punctuation">,</span>
-    <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Cien años de soledad"</span><span class="token punctuation">,</span>
-    <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Novela"</span><span class="token punctuation">,</span>
-    <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Gabriel García Márquez"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Colombiana"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-<span class="token punctuation">{</span>
-    <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8499082479"</span><span class="token punctuation">,</span>
-    <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Tokio Blues"</span><span class="token punctuation">,</span>
-    <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Ficción"</span><span class="token punctuation">,</span>
-    <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Haruki Murakami"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Japonesa"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-<span class="token punctuation">{</span>
-    <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8466350540"</span><span class="token punctuation">,</span>
-    <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Kafka en la orilla"</span><span class="token punctuation">,</span>
-    <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Fantasía"</span><span class="token punctuation">,</span>
-    <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Haruki Murakami"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Japonesa"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-<span class="token punctuation">{</span>
-    <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8498387087"</span><span class="token punctuation">,</span>
-    <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"El cuento de la criada"</span><span class="token punctuation">,</span>
-    <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Distopía"</span><span class="token punctuation">,</span>
-    <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Margaret Atwood"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Canadiense"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-<span class="token punctuation">{</span>
-    <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8433972461"</span><span class="token punctuation">,</span>
-    <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Alias Grace"</span><span class="token punctuation">,</span>
-    <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Histórica"</span><span class="token punctuation">,</span>
-    <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Margaret Atwood"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Canadiense"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-<span class="token punctuation">{</span>
-    <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8433975011"</span><span class="token punctuation">,</span>
-    <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Oryx y Crake"</span><span class="token punctuation">,</span>
-    <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Ciencia ficción"</span><span class="token punctuation">,</span>
-    <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
-        <span class="token punctuation">{</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Margaret Atwood"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Canadiense"</span> <span class="token punctuation">}</span>
-    <span class="token punctuation">]</span>
-<span class="token punctuation">}</span>
-</code></pre></div>
+</code></pre><p>De esta forma estamos privilegiando la eficiencia en las consultas sobre los profesores, ya que toda la información relacionada con cada profesor está contenida en un único documento. Por contra, las consultas sobre las materias serían menos eficientes, ya que tendríamos que recorrer todos los documentos de profesores para encontrar la información de una materia específica.</p>
+<p>Una solución sería tener también una colección de <strong>materias</strong> con todos los profesores que imparten cada materia.</p>
+<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Álgebra Lineal"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12345678A"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ana López"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Titular"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12345678A"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ana López"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Titular"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"34567890C"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carla Sánchez"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Estadística"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"23456789B"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Bruno García"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Asociado"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"34567890C"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carla Sánchez"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ecuaciones Diferenciales"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"23456789B"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Bruno García"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Asociado"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token punctuation">{</span> <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"34567890C"</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carla Sánchez"</span><span class="token punctuation">,</span> <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+</code></pre><p>Ahora tanto las consultas sobre profesores como las consultas sobre materias serían eficientes, ya que toda la información relacionada con cada profesor y cada materia está contenida en un único documento. Sin embargo, esto implica una enorme cantidad de información duplicada, lo que puede llevar a problemas de consistencia y a la necesidad de mantener la información actualizada en múltiples lugares.</p>
+<p>Si utilizamos la <strong>estrategia de referencing</strong>, podríamos almacenar la información de las materias en una colección separada y referenciarla desde los documentos de los profesores mediante identificadores. De forma análoga, podríamos almacenar la información de los profesores en una colección separada y referenciarla desde los documentos de las materias. A continuación se muestra un ejemplo de cómo modelar esta relación M-N utilizando <em>referencing</em>.</p>
+<p>Para los documentos de <strong>profesores</strong>, tendríamos lo siguiente:</p>
+<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"100"</span><span class="token punctuation">,</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"12345678A"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ana López"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Titular"</span><span class="token punctuation">,</span>
+        <span class="token property">"materias"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"1"</span><span class="token punctuation">,</span> <span class="token string">"2"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"101"</span><span class="token punctuation">,</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"23456789B"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Bruno García"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Asociado"</span><span class="token punctuation">,</span>
+        <span class="token property">"materias"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"3"</span><span class="token punctuation">,</span> <span class="token string">"4"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"102"</span><span class="token punctuation">,</span>
+        <span class="token property">"dni"</span><span class="token operator">:</span> <span class="token string">"34567890C"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Carla Sánchez"</span><span class="token punctuation">,</span>
+        <span class="token property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span><span class="token punctuation">,</span>
+        <span class="token property">"materias"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"2"</span><span class="token punctuation">,</span> <span class="token string">"3"</span><span class="token punctuation">,</span> <span class="token string">"4"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+</code></pre><p>Para los documentos de <strong>materias</strong>, tendríamos lo siguiente:</p>
+<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Álgebra Lineal"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"100"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"1"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"100"</span><span class="token punctuation">,</span> <span class="token string">"102"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"3"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Estadística"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"101"</span><span class="token punctuation">,</span> <span class="token string">"102"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token string">"4"</span><span class="token punctuation">,</span>
+        <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Ecuaciones Diferenciales"</span><span class="token punctuation">,</span> 
+        <span class="token property">"creditos"</span><span class="token operator">:</span> <span class="token string">"6"</span><span class="token punctuation">,</span>
+        <span class="token property">"curso"</span><span class="token operator">:</span> <span class="token string">"2"</span><span class="token punctuation">,</span>
+        <span class="token property">"profesores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"101"</span><span class="token punctuation">,</span> <span class="token string">"102"</span><span class="token punctuation">]</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span>
+</code></pre><h3 id="consultas-multitablas">Consultas multitablas </h3>
+<p>La mayor parte de consultas multitabla utilizan el marco de agregación para realizar operaciones de join entre colecciones utilizando el operador <code>$lookup</code>, y consultas que descompongan arrays en documentos individuales utilizando el operador <code>$unwind</code>, entre otras posibilidades avanzadas.<br>
+Cuando se utilizan documentos embebidos para modelar relaciones 1-N, se pueden realizar consultas utilizando el operador <code>$unwind</code> para descomponer los documentos embebidos en documentos individuales y luego aplicar filtros o proyecciones sobre los campos deseados. Cuando aplicamos el operador <code>$unwind</code> sobre un campo que contiene un array de documentos embebidos, MongoDB genera un nuevo documento para cada elemento del array, manteniendo los campos del documento principal. Esto permite realizar consultas específicas sobre los elementos embebidos como si fueran documentos independientes. El siguiente ejemplo ilustra el uso de <code>$unwind</code> para consultar documentos con documentos embebidos.</p>
 <div class="admonition example">
-<p class="admonition-title">Método referencing para relación M-N</p>
-<p>Para modelar una relación M-N entre libros y autores utilizando referencing, se podrían tener dos documentos separados:</p>
-<pre data-role="codeBlock" data-info="json" class="language-json json"><code><span class="token comment">// libros</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">100</span><span class="token punctuation">,</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-0307474728"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Cien años de soledad"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Novela"</span><span class="token punctuation">,</span> <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">101</span><span class="token punctuation">,</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8499082479"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Tokio Blues"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Ficción"</span><span class="token punctuation">,</span> <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">102</span><span class="token punctuation">,</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8466350540"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Kafka en la orilla"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Fantasía"</span><span class="token punctuation">,</span> <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">103</span><span class="token punctuation">,</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8498387087"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"El cuento de la criada"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Distopía"</span><span class="token punctuation">,</span> <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">104</span><span class="token punctuation">,</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8433972461"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Alias Grace"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Histórica"</span><span class="token punctuation">,</span> <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">105</span><span class="token punctuation">,</span> <span class="token property">"isbn"</span><span class="token operator">:</span> <span class="token string">"978-8433975011"</span><span class="token punctuation">,</span> <span class="token property">"titulo"</span><span class="token operator">:</span> <span class="token string">"Oryx y Crake"</span><span class="token punctuation">,</span> <span class="token property">"genero"</span><span class="token operator">:</span> <span class="token string">"Ciencia ficción"</span><span class="token punctuation">,</span> <span class="token property">"autores"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">3</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token comment">// autores</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Gabriel García Márquez"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Colombiana"</span><span class="token punctuation">,</span> <span class="token property">"libros"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">100</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">2</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Haruki Murakami"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Japonesa"</span><span class="token punctuation">,</span> <span class="token property">"libros"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">101</span><span class="token punctuation">,</span> <span class="token number">102</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-<span class="token punctuation">{</span> <span class="token property">"_id"</span><span class="token operator">:</span> <span class="token number">3</span><span class="token punctuation">,</span> <span class="token property">"nombre"</span><span class="token operator">:</span> <span class="token string">"Margaret Atwood"</span><span class="token punctuation">,</span> <span class="token property">"nacionalidad"</span><span class="token operator">:</span> <span class="token string">"Canadiense"</span><span class="token punctuation">,</span> <span class="token property">"libros"</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token number">103</span><span class="token punctuation">,</span> <span class="token number">104</span><span class="token punctuation">,</span> <span class="token number">105</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
-</code></pre><p>En este caso, cada documento de libro contiene una lista de referencias a los documentos de los autores mediante el campo <code>autores</code>, y cada documento de autor contiene una lista de referencias a los documentos de los libros mediante el campo <code>libros</code>.</p>
+<p class="admonition-title">Consulta multitabla (embedding)</p>
+<p>En el siguiente ejemplo obtenemos el nombre del equipo y el nombre de cada base para los equipos de la división <em>Atlantic</em> teniendo en cuenta que los jugadores están embebidos dentro de los documentos de la colección <code>equipos</code>. El resultado debe estar ordenado por el nombre del equipo y el nombre del jugador de forma ascendente.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">equipos</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">Division</span><span class="token operator">:</span> <span class="token string">"Atlantic"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$jugadores"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"jugadores.Posicion"</span><span class="token operator">:</span> <span class="token string">"G"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+      <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">equipo</span><span class="token operator">:</span> <span class="token string">"$Nombre"</span><span class="token punctuation">,</span>
+      <span class="token literal-property property">jugador</span><span class="token operator">:</span> <span class="token string">"$jugadores.Nombre"</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span>
+    <span class="token literal-property property">$sort</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">equipo</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">jugador</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>A continuación se explica el resultado de cada etapa del pipeline:</p>
+<ul>
+<li>En la primera etapa (<code>$match</code>), se filtran los documentos de la colección <code>equipos</code> para obtener solo aquellos que pertenecen a la división <em>Atlantic</em>. En total son 6 equipos.</li>
+<li>En la segunda etapa (<code>$unwind</code>), se descompone el array de jugadores embebido en cada documento de equipo, generando un nuevo documento para cada jugador (incluyendo los datos del equipo al que pertenece). La variable <code>$jugadores</code> se utiliza para referirse a cada jugador individualmente en las etapas posteriores.</li>
+<li>En total 72 documentos correspondientes a los 72 jugadores de los 6 equipos.</li>
+<li>En la tercera etapa (<code>$match</code>), se filtran los documentos resultantes para obtener solo aquellos jugadores que ocupan la posición de base (G). En total 22 jugadores.</li>
+<li>En la cuarta etapa (<code>$project</code>), se proyectan solo los campos deseados, en este caso el nombre del equipo y el nombre del jugador, excluyendo el campo <code>_id</code>.</li>
+<li>Finalmente, en la última etapa (<code>$sort</code>), se ordenan los resultados por el nombre del equipo y el nombre del jugador de forma ascendente.</li>
+</ul>
+</div>
+<p>A continuación se muestra un ejemplo de cómo realizar una consulta multitabla utilizando el modelo referenciado con el operador <code>$lookup</code> para realizar un join entre las colecciones <code>equipos</code> y <code>jugadores</code>.</p>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (referencing)</p>
+<p>En el siguiente ejemplo obtenemos el nombre del equipo y el nombre de cada base para los equipos de la división <em>Atlantic</em> teniendo en cuenta que los jugadores referencian al equipo al que pertenecen mediante el campo <code>equipo</code>. El resultado debe estar ordenado por el nombre del equipo y el nombre del jugador de forma ascendente.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">jugadores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+      <span class="token literal-property property">$lookup</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token keyword module keyword-from">from</span><span class="token operator">:</span> <span class="token string">"equipos"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">localField</span><span class="token operator">:</span> <span class="token string">"equipo"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">foreignField</span><span class="token operator">:</span> <span class="token string">"_id"</span><span class="token punctuation">,</span>
+        <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"equipoInfo"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$equipoInfo"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">Posicion</span><span class="token operator">:</span> <span class="token string">"G"</span><span class="token punctuation">,</span>
+        <span class="token string-property property">"equipoInfo.Division"</span><span class="token operator">:</span> <span class="token string">"Atlantic"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">equipo</span><span class="token operator">:</span> <span class="token string">"$equipoInfo.Nombre"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">jugador</span><span class="token operator">:</span> <span class="token string">"$Nombre"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token literal-property property">$sort</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">equipo</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">jugador</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>A continuación se explica el resultado de cada etapa del pipeline:</p>
+<ul>
+<li>En la primera etapa (<code>$lookup</code>), se realiza un join entre la colección <code>jugadores</code> y la colección <code>equipos</code>, donde se especifica que el campo <code>equipo</code> de la colección <code>jugadores</code> se corresponde con el campo <code>_id</code> de la colección <code>equipos</code>. El resultado del join se almacena en un nuevo campo llamado <code>equipoInfo</code>, que contiene un array de documentos correspondientes al equipo al que pertenece cada jugador. En total 432 documentos correspondientes a todos los jugadores que tenemos en nuestra base de datos.</li>
+<li>En la segunda etapa (<code>$unwind</code>), se descompone el array <code>equipoInfo</code> para obtener un documento individual para cada jugador con la información del equipo correspondiente (seguimos teniendo 432 documentos).</li>
+<li>En la tercera etapa (<code>$match</code>), se filtran los documentos resultantes para obtener solo aquellos jugadores que ocupan la posición de base (G) y pertenecen a equipos de la división <em>Atlantic</em>. En total 22 jugadores.</li>
+<li>En la cuarta etapa (<code>$project</code>), se proyectan solo los campos deseados, en este caso el nombre del equipo y el nombre del jugador, excluyendo el campo <code>_id</code>.</li>
+<li>Finalmente, en la última etapa (<code>$sort</code>), se ordenan los resultados por el nombre del equipo y el nombre del jugador de forma ascendente.</li>
+</ul>
+</div>
+<p>Los ejemplos vistos hasta ahora trabajaban con colecciones que mantenía una relación 1-N entre ellas. Para el caso de relaciones M-N, las consultas pueden ser más complejas, especialmente si se utiliza el modelo embebido, ya que puede haber duplicación de información y la necesidad de eliminar duplicados en los resultados. En el caso del modelo referenciado, las consultas pueden requerir múltiples etapas de <code>$lookup</code> para realizar joins entre las colecciones relacionadas.</p>
+<p>A continuación vamos a ver una serie de ejemplos de consultas multitabla utilizando tanto el modelo embebido como el modelo referenciado para ilustrar cómo realizar consultas en ambos casos.</p>
+<p>Retomamos el ejemplo de la facultad de Matemáticas con profesores y materias para ilustrar cómo realizar consultas multitabla en ambos casos. Vamos a considerar que inicialmente solo tenemos la colección de profesores con las materias embebidas.</p>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N embedding)</p>
+<p>Necesito saber el nombre y la plaza de todos los profesores que imparten Estadistica.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">profesores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$materias"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"materias.nombre"</span><span class="token operator">:</span> <span class="token string">"Estadística"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token string">"$nombre"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token string">"$tipoPlaza"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>Esta consulta es similar a las que hemos visto anteriormente.</p>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N embedding)</p>
+<p>Necesito saber el nombre y los créditos de todas las materias impartidas por todos los profesores que son catedráticos (elimina duplicados).</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">profesores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$materias"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token string">"$materias.nombre"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">creditos</span><span class="token operator">:</span> <span class="token string">"$materias.creditos"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$group</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token string">"$nombre"</span> <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token string">"$_id"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">creditos</span><span class="token operator">:</span> <span class="token number">1</span>
+         <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>Esta consulta es bastante más compleja que las anteriores, ya que incluye una etapa de agrupación para eliminar los duplicados de materias impartidas por varios catedráticos.<br>
+La consulta consiste en las siguientes etapas:</p>
+<ul>
+<li>En la primera etapa (<code>$match</code>), se filtran los documentos de la colección <code>profesores</code> para obtener solo aquellos que tienen el tipo de plaza "Catedrático".</li>
+<li>En la segunda etapa (<code>$unwind</code>), se descompone el array de materias embebido en cada documento de profesor, generando un nuevo documento para cada materia impartida por los catedráticos.</li>
+<li>En la tercera etapa (<code>$project</code>), se proyectan solo los campos deseados, en este caso el nombre de la materia y los créditos, excluyendo el campo <code>_id</code>.</li>
+<li>En la cuarta etapa (<code>$group</code>), se agrupan los documentos por el nombre de la materia para eliminar los duplicados, utilizando el operador <code>$first</code> para conservar los créditos de la primera aparición de cada materia.</li>
+<li>Finalmente, en la última etapa (<code>$project</code>), se proyectan nuevamente los campos deseados, en este caso el nombre de la materia y los créditos, excluyendo el campo <code>_id</code>.</li>
+</ul>
+</div>
+<p>Evidentemente, si hubieramos tenido embebidas también las materias dentro de los documentos de los profesores, la consulta sería mucho más sencilla, ya que no tendríamos que preocuparnos por eliminar duplicados. La consulta sería similar a la primera consulta que hemos visto.</p>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N embedding)</p>
+<p>Necesito saber el nombre y los créditos de todas las materias impartidas por todos los profesores que son catedráticos.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">profesores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"tipoPlaza"</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$materias"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token string">"$materias.nombre"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">creditos</span><span class="token operator">:</span> <span class="token string">"$materias.creditos"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Con el modelo referenciado, la consulta sería similar a la consulta multitabla que hemos visto anteriormente utilizando <code>$lookup</code> para realizar el join entre las colecciones de profesores y materias. Si suponemos que tenemos una colección de profesores con referencias a las materias que imparten y una colección de materias con referencias a los profesores que las imparten. Con este supuesto realzaremos un par de consultas para ilustrar cómo realizar consultas multitabla en este caso.</p>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N referencing)</p>
+<p>Necesito saber el nombre y los créditos de todas las materias impartidas por todos los profesores que son catedráticos.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">profesores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token string">"Catedrático"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$materias"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token literal-property property">$lookup</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token keyword module keyword-from">from</span><span class="token operator">:</span>  <span class="token string">"materias"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">localField</span><span class="token operator">:</span> <span class="token string">"materias"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">foreignField</span><span class="token operator">:</span> <span class="token string">"_id"</span><span class="token punctuation">,</span>
+        <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"materiaInfo"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$materiaInfo"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+      <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+        <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">materia</span><span class="token operator">:</span> <span class="token string">"$materiaInfo.nombre"</span><span class="token punctuation">,</span>
+        <span class="token literal-property property">creditos</span><span class="token operator">:</span> <span class="token string">"$materiaInfo.creditos"</span>
+      <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>Las etapas de esta consulta son las siguientes:</p>
+<ul>
+<li>En la primera etapa (<code>$match</code>), se filtran los documentos de la colección <code>profesores</code> para obtener solo aquellos que tienen el tipo de plaza "Catedrático".</li>
+<li>En la segunda etapa (<code>$unwind</code>), se descompone el array de materias referenciadas en cada documento de profesor, generando un nuevo documento para cada materia impartida por los catedráticos.</li>
+<li>En la tercera etapa (<code>$lookup</code>), se realiza un join entre la colección <code>profesores</code> y la colección <code>materias</code>, donde se especifica que el campo <code>materias</code> de la colección <code>profesores</code> se corresponde con el campo <code>_id</code> de la colección <code>materias</code>. El resultado del join se almacena en un nuevo campo llamado <code>materiaInfo</code>, que contiene un array de documentos correspondientes a la materia impartida por cada profesor.</li>
+<li>En la cuarta etapa (<code>$unwind</code>), se descompone el array <code>materiaInfo</code> para obtener un documento individual para cada materia impartida por los catedráticos.</li>
+<li>En la quinta etapa (<code>$project</code>), se proyectan solo los campos deseados, en este caso el nombre de la materia y los créditos, excluyendo el campo <code>_id</code>.</li>
+</ul>
+</div>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N referencing)</p>
+<p>Necesito saber el nombre y la plaza de todos los profesores que imparten <em>Estadística</em> o <em>Cálculo I</em>.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">materias</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token punctuation">{</span> $<span class="token keyword keyword-in">in</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"Estadística"</span><span class="token punctuation">,</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$profesores"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$lookup</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token keyword module keyword-from">from</span><span class="token operator">:</span> <span class="token string">"profesores"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">localField</span><span class="token operator">:</span> <span class="token string">"profesores"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">foreignField</span><span class="token operator">:</span> <span class="token string">"_id"</span><span class="token punctuation">,</span>
+            <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"profesorInfo"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$profesorInfo"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$group</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token string">"$profesorInfo._id"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">$first</span><span class="token operator">:</span> <span class="token string">"$profesorInfo.nombre"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">$first</span><span class="token operator">:</span> <span class="token string">"$profesorInfo.tipoPlaza"</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>Consulta similar a la anterior salvo que ahora es necesario hacer un <code>$group</code> para evitar duplicados cuando un profesor imparte ambas materias.</p>
+</div>
+<p>En la consulta anterior, partimos de la colección <code>materias</code> para obtener los profesores que imparten las materias de interés. Sin embargo, también podríamos partir de la colección <code>profesores</code> y realizar un <code>$lookup</code> para obtener la información de las materias que imparten cada profesor, y luego aplicar un filtro para obtener solo aquellos profesores que imparten las materias de interés. Esto nos permitiría evitar el uso del operador <code>$group</code> para eliminar duplicados, ya que estaríamos obteniendo un documento por profesor desde el principio.</p>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N referencing)</p>
+<p>Necesito saber el nombre y la plaza de todos los profesores que imparten <em>Estadística</em> o <em>Cálculo I</em>.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">profesores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$lookup</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token keyword module keyword-from">from</span><span class="token operator">:</span> <span class="token string">"materias"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">localField</span><span class="token operator">:</span> <span class="token string">"materias"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">foreignField</span><span class="token operator">:</span> <span class="token string">"_id"</span><span class="token punctuation">,</span>
+            <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"materiasInfo"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token string-property property">"materiasInfo.nombre"</span><span class="token operator">:</span> <span class="token punctuation">{</span> $<span class="token keyword keyword-in">in</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"Estadística"</span><span class="token punctuation">,</span> <span class="token string">"Cálculo I"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre></div>
+<p>Por último, vamos a ver un ejemplo de consulta multitabla más compleja utilizando el modelo referenciado, donde se utilizan dos etapas de <code>$lookup</code> para obtener información de ambas colecciones relacionadas.</p>
+<div class="admonition example">
+<p class="admonition-title">Consulta multitabla (M-N referencing, 2 $lookup)</p>
+<p>Para cada profesor, necesito una lista de elementos con: <strong>nombre de materia</strong> y <strong>lista de nombres de los profesores</strong> que imparten esa misma materia.</p>
+<pre data-role="codeBlock" data-info="js" class="language-javascript js"><code>db<span class="token punctuation">.</span><span class="token property-access">profesores</span><span class="token punctuation">.</span><span class="token method function property-access">aggregate</span><span class="token punctuation">(</span>
+<span class="token punctuation">[</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$lookup</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token keyword module keyword-from">from</span><span class="token operator">:</span> <span class="token string">"materias"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">localField</span><span class="token operator">:</span> <span class="token string">"materias"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">foreignField</span><span class="token operator">:</span> <span class="token string">"_id"</span><span class="token punctuation">,</span>
+            <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"materiasInfo"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$unwind</span><span class="token operator">:</span> <span class="token string">"$materiasInfo"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$lookup</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token keyword module keyword-from">from</span><span class="token operator">:</span> <span class="token string">"profesores"</span><span class="token punctuation">,</span>
+            <span class="token keyword keyword-let">let</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">materiaId</span><span class="token operator">:</span> <span class="token string">"$materiasInfo._id"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">pipeline</span><span class="token operator">:</span> <span class="token punctuation">[</span>
+                <span class="token punctuation">{</span>
+                    <span class="token literal-property property">$match</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                        <span class="token literal-property property">$expr</span><span class="token operator">:</span> <span class="token punctuation">{</span> $<span class="token keyword keyword-in">in</span><span class="token operator">:</span> <span class="token punctuation">[</span><span class="token string">"$$materiaId"</span><span class="token punctuation">,</span> <span class="token string">"$materias"</span><span class="token punctuation">]</span> <span class="token punctuation">}</span>
+                    <span class="token punctuation">}</span>
+                <span class="token punctuation">}</span><span class="token punctuation">,</span>
+                <span class="token punctuation">{</span> <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+            <span class="token punctuation">]</span><span class="token punctuation">,</span>
+            <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"profesoresMismaMateria"</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">materia</span><span class="token operator">:</span> <span class="token string">"$materiasInfo.nombre"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">profesores</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                <span class="token literal-property property">$map</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+                    <span class="token literal-property property">input</span><span class="token operator">:</span> <span class="token string">"$profesoresMismaMateria"</span><span class="token punctuation">,</span>
+                    <span class="token keyword module keyword-as">as</span><span class="token operator">:</span> <span class="token string">"p"</span><span class="token punctuation">,</span>
+                    <span class="token keyword keyword-in">in</span><span class="token operator">:</span> <span class="token string">"$$p.nombre"</span>
+                <span class="token punctuation">}</span>
+            <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span>
+        <span class="token literal-property property">$group</span><span class="token operator">:</span> <span class="token punctuation">{</span>
+            <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token string">"$_id"</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">$first</span><span class="token operator">:</span> <span class="token string">"$nombre"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">$first</span><span class="token operator">:</span> <span class="token string">"$tipoPlaza"</span> <span class="token punctuation">}</span><span class="token punctuation">,</span>
+            <span class="token literal-property property">materias</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">$push</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">materia</span><span class="token operator">:</span> <span class="token string">"$materia"</span><span class="token punctuation">,</span> <span class="token literal-property property">profesores</span><span class="token operator">:</span> <span class="token string">"$profesores"</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+        <span class="token punctuation">}</span>
+    <span class="token punctuation">}</span><span class="token punctuation">,</span>
+    <span class="token punctuation">{</span> <span class="token literal-property property">$project</span><span class="token operator">:</span> <span class="token punctuation">{</span> <span class="token literal-property property">_id</span><span class="token operator">:</span> <span class="token number">0</span><span class="token punctuation">,</span> <span class="token literal-property property">nombre</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">tipoPlaza</span><span class="token operator">:</span> <span class="token number">1</span><span class="token punctuation">,</span> <span class="token literal-property property">materias</span><span class="token operator">:</span> <span class="token number">1</span> <span class="token punctuation">}</span> <span class="token punctuation">}</span>
+<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre><p>En este caso se usan 2 <code>$lookup</code>: el primero para obtener la información de las materias, y el segundo para obtener los profesores que imparten cada materia.</p>
 </div>
 <h3 id="otras-aspectos-importantes-de-mongodb">Otras aspectos importantes de MongoDB </h3>
 <p>A continuación se presentan otros aspectos importantes de MongoDB aunque se abordarán de forma muy superficial, ya que cada uno de ellos merece un tratamiento más detallado.</p>
